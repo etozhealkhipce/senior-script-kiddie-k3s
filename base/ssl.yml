@@ -1,0 +1,22 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: ssl
+spec:
+  acme:
+    email:
+      valueFrom:
+        secretKeyRef:
+          name: common-secret
+          key: email
+    server:
+      valueFrom:
+        secretKeyRef:
+          name: common-secret
+          key: acme-server
+    privateKeySecretRef:
+      name: ssl
+    solvers:
+      - http01:
+          ingress:
+            class: traefik

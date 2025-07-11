@@ -16,9 +16,16 @@ metadata:
     traefik.ingress.kubernetes.io/proxy-send-timeout: "60"
     # Additional settings
     traefik.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
+    # SSL
+    cert-manager.io/cluster-issuer: ssl
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
 spec:
   rules:
-    - host: sskd.tech
+    - host:
+        valueFrom:
+          secretKeyRef:
+            name: common-secret
+            key: domain
       http:
         paths:
           - path: /
@@ -28,3 +35,10 @@ spec:
                 name: sskd-frontend
                 port:
                   number: 80
+  tls:
+    - secretName: sskd-tls
+      hosts:
+        - valueFrom:
+            secretKeyRef:
+              name: common-secret
+              key: domain

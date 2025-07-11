@@ -50,12 +50,30 @@ jobs:
             echo "APPLYING NAMESPACE"
             kubectl apply -f namespace.yml
 
+            echo "CREATING SECRETS"
+            cat >secrets.yml << EOF
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: common-secret
+              namespace: sskd
+            type: Opaque
+            data:
+              email: $(echo -n "${{ secrets.EMAIL }}" | base64 -w 0)
+              acme-server: $(echo -n "${{ secrets.ACME_SERVER }}" | base64 -w 0)
+              domain: $(echo -n "${{ secrets.DOMAIN }}" | base64 -w 0)
+            EOF
+
+            echo "APPLYING SECRETS"
+            kubectl apply -f secrets.yml
+
             echo "WAITING FOR NAMESPACE"
-            kubectl wait --for=condition=Active namespace/sskd --timeout=60s
+            kubectl wait --for=condition=Active namespace/sskd --timeout=30s
 
             echo "APPLYING MANIFESTS"
             kubectl apply -f traefik-config.yml
             kubectl apply -f ingress.yml
+            kubectl apply -f ssl.yml
 
             rm -rf /tmp/k3s-deploy
 
