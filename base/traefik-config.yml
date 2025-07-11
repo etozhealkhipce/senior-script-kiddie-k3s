@@ -24,17 +24,6 @@ data:
               permanent: true
       websecure:
         address: ":443"
-        http:
-          tls:
-            certResolver: letsencrypt
-
-    certificatesResolvers:
-      letsencrypt:
-        acme:
-          email: alhipce@mail.ru
-          storage: /data/acme.json
-          httpChallenge:
-            entryPoint: web
 
     providers:
       kubernetesCRD: {}
