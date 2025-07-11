@@ -8,7 +8,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: "letsencrypt"
-    traefik.ingress.kubernetes.io/middlewares: "sskd-https-redirect@kubernetescrd"
+    traefik.ingress.kubernetes.io/middlewares: "https-redirect@kubernetescrd"
     traefik.ingress.kubernetes.io/ssl-redirect: "true"
     traefik.ingress.kubernetes.io/ssl-permanent-redirect: "true"
     # Proxy settings
@@ -20,16 +20,17 @@ metadata:
 spec:
   tls:
     - hosts:
-        - app.sskd.com
-      secretName: app-tls
+        - sskd.tech
+      secretName: sskd-tls
   rules:
-    - host: app.sskd.com
+    - host: sskd.tech
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: app-service
+                name: sskd-frontend-service
                 port:
                   number: 80
+                  targetPort: 8080

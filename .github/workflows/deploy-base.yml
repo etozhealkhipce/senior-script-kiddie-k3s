@@ -22,42 +22,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
         with:
-          version: "latest"
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "base/*"
+          target: "/tmp/k3s-deploy"
+          strip_components: 1
 
-      - name: Setup Kustomize
-        run: |
-          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-          sudo mv kustomize /usr/local/bin/
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /tmp/k3s-deploy
 
-      - name: Validate base configuration
-        run: |
-          echo "🔍 Validating base configuration..."
+            kubectl apply -f namespace.yaml
+            kubectl apply -f traefik-config.yaml
+            kubectl apply -f middleware-https-redirect.yaml
+            kubectl apply -f ingress.yaml
 
-          for file in base/*.yaml; do
-            echo "Validating $file..."
-            kubectl apply --dry-run=client -f "$file"
-          done
+            kubectl wait --for=condition=Active namespace/sskd --timeout=60s
 
-          echo "Validating kustomization.yaml..."
-          kustomize build base/ --dry-run
+            rm -rf /tmp/k3s-deploy
 
-      - name: Configure kubectl
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-
-          kubectl cluster-info
-
-      - name: Deploy base configuration
-        run: |
-          echo "🚀 Deploying base configuration to K3S..."
-
-          kustomize build base/ | kubectl apply -f -
-
-          kubectl wait --for=condition=Active namespace/sskd --timeout=60s
-
-          echo "✅ Base configuration deployed successfully!"
+            echo "FINISHED"
