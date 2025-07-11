@@ -59,9 +59,7 @@ jobs:
               namespace: sskd
             type: Opaque
             data:
-              email: $(echo -n "${{ secrets.EMAIL }}" | base64 -w 0)
-              acme-server: $(echo -n "${{ secrets.ACME_SERVER }}" | base64 -w 0)
-              domain: $(echo -n "${{ secrets.DOMAIN }}" | base64 -w 0)
+              test: $(echo -n "${{ secrets.EMAIL }}" | base64 -w 0)
             EOF
 
             echo "APPLYING SECRETS"

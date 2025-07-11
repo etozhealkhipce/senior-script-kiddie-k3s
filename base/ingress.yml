@@ -32,4 +32,5 @@ spec:
                   number: 80
   tls:
     - secretName: sskd-tls
-      hosts: sskd.tech
+      hosts:
+        - sskd.tech
