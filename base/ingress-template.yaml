@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: sskd
+  annotations:
+    # K3S Traefik annotations
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: "letsencrypt"
+    traefik.ingress.kubernetes.io/middlewares: "sskd-https-redirect@kubernetescrd"
+    traefik.ingress.kubernetes.io/ssl-redirect: "true"
+    traefik.ingress.kubernetes.io/ssl-permanent-redirect: "true"
+    # Proxy settings
+    traefik.ingress.kubernetes.io/proxy-body-size: "10m"
+    traefik.ingress.kubernetes.io/proxy-read-timeout: "60"
+    traefik.ingress.kubernetes.io/proxy-send-timeout: "60"
+    # Additional settings
+    traefik.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
+spec:
+  tls:
+    - hosts:
+        - app.sskd.com
+      secretName: app-tls
+  rules:
+    - host: app.sskd.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app-service
+                port:
+                  number: 80

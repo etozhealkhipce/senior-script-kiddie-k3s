@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sskd
+  labels:
+    name: sskd
+    environment: production
