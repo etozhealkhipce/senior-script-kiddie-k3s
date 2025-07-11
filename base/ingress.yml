@@ -29,6 +29,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: sskd-frontend-service
+                name: sskd-frontend
                 port:
                   number: 80
