@@ -4,16 +4,8 @@ metadata:
   name: ssl
 spec:
   acme:
-    email:
-      valueFrom:
-        secretKeyRef:
-          name: common-secret
-          key: email
-    server:
-      valueFrom:
-        secretKeyRef:
-          name: common-secret
-          key: acme-server
+    email: alhipce@mail.ru
+    server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: ssl
     solvers:
