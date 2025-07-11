@@ -47,13 +47,15 @@ jobs:
 
             cd /tmp/k3s-deploy
 
-            echo "APPLYING MANIFESTS"
+            echo "APPLYING NAMESPACE"
             kubectl apply -f namespace.yml
+
+            echo "WAITING FOR NAMESPACE"
+            kubectl wait --for=condition=Active namespace/sskd --timeout=60s
+
+            echo "APPLYING MANIFESTS"
             kubectl apply -f traefik-config.yml
             kubectl apply -f ingress.yml
-
-            echo "WAITING FOR POD"
-            kubectl wait --for=condition=Active namespace/sskd --timeout=60s
 
             rm -rf /tmp/k3s-deploy
 
