@@ -26,7 +26,7 @@ jobs:
         uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "base/*"
           target: "/tmp/k3s-deploy"
@@ -36,16 +36,23 @@ jobs:
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            echo "CHECKING kubectl"
+            if ! command -v kubectl &> /dev/null; then
+                echo "kubectl NOT FOUND"
+                exit 1
+            fi
+
             cd /tmp/k3s-deploy
 
-            kubectl apply -f namespace.yaml
-            kubectl apply -f traefik-config.yaml
-            kubectl apply -f middleware-https-redirect.yaml
-            kubectl apply -f ingress.yaml
+            echo "APPLYING MANIFESTS"
+            kubectl apply -f namespace.yml
+            kubectl apply -f traefik-config.yml
+            kubectl apply -f ingress.yml
 
+            echo "WAITING FOR POD"
             kubectl wait --for=condition=Active namespace/sskd --timeout=60s
 
             rm -rf /tmp/k3s-deploy
