@@ -16,15 +16,11 @@ metadata:
     # Additional settings
     traefik.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
     # SSL
-    cert-manager.io/cluster-issuer: "ssl"
-    traefik.ingress.kubernetes.io/router.middlewares: "sskd-default-redirect-https@kubernetescrd"
+    cert-manager.io/cluster-issuer: ssl
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
 spec:
   rules:
-    - host:
-        valueFrom:
-          secretKeyRef:
-            name: common-secret
-            key: domain
+    - host: sskd.tech
       http:
         paths:
           - path: /
