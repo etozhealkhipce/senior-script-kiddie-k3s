@@ -16,8 +16,6 @@ metadata:
     traefik.ingress.kubernetes.io/proxy-send-timeout: "60"
     # Additional settings
     traefik.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
-    # SPA mode - serve index.html for all routes
-    traefik.ingress.kubernetes.io/app-root: "/"
 spec:
   rules:
     - host: sskd.tech
