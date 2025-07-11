@@ -19,10 +19,10 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout code
+      - name: CHECKOUT
         uses: actions/checkout@v4
 
-      - name: Copy files to server
+      - name: COPY FILES
         uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -32,7 +32,7 @@ jobs:
           target: "/tmp/k3s-deploy"
           strip_components: 1
 
-      - name: Deploy on server
+      - name: DEPLOY
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.SERVER_HOST }}
