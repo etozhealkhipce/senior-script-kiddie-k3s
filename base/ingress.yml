@@ -17,10 +17,6 @@ metadata:
     # Additional settings
     traefik.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
 spec:
-  tls:
-    - hosts:
-        - sskd.tech
-      secretName: sskd-tls
   rules:
     - host: sskd.tech
       http:
