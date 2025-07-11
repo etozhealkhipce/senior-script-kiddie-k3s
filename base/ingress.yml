@@ -17,7 +17,6 @@ metadata:
     traefik.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
     # SSL
     cert-manager.io/cluster-issuer: ssl
-    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
 spec:
   rules:
     - host: sskd.tech
