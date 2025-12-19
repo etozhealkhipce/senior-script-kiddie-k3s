@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "charts/sskd-infrastructure/**"
+      - ".github/workflows/deploy-infrastructure.yml"
   workflow_dispatch:
 
 jobs:
