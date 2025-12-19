@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy:
-    uses: alkhipce/senior-script-kiddie-k3s/.github/workflows/deploy-app.yml@main
+    uses: etozhealkhipce/senior-script-kiddie-k3s/.github/workflows/deploy-app.yml@main
     with:
       app_name: my-app           # <-- ИЗМЕНИТЕ
       app_host: my-app.sskd.tech # <-- ИЗМЕНИТЕ (удалите если не нужен ingress)

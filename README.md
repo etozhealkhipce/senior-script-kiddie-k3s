@@ -23,7 +23,7 @@ on:
 
 jobs:
   deploy:
-    uses: alkhipce/senior-script-kiddie-k3s/.github/workflows/deploy-app.yml@main
+    uses: username/repo/.github/workflows/deploy-app.yml@main
     with:
       app_name: my-app
       app_host: my-app.sskd.tech
@@ -34,9 +34,25 @@ jobs:
 
 ---
 
-## Поднятие инфраструктуры:
+## Настройка нового сервера
 
-### Установка инфраструктуры
+```bash
+# K3s
+curl -sfL https://get.k3s.io | sh -
+
+# Kubectl config
+mkdir -p ~/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config
+export KUBECONFIG=~/.kube/config
+
+# Helm
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# Cert-manager
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml
+kubectl wait --for=condition=Ready pods -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=120s
+```
 
 ## 📊 Headlamp (Dashboard)
 

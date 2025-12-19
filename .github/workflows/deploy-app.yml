@@ -32,7 +32,7 @@ on:
 env:
   REGISTRY: ghcr.io
   NAMESPACE: sskd
-  BASE_REPO: alkhipce/senior-script-kiddie-k3s
+  BASE_REPO: etozhealkhipce/senior-script-kiddie-k3s
 
 jobs:
   build-and-deploy:
