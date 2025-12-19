@@ -13,6 +13,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Copy charts to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "charts/sskd-infrastructure/*"
+          target: "/tmp/sskd-infra"
+
       - name: Deploy Infrastructure to K3s
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -22,18 +31,10 @@ jobs:
           script: |
             set -e
 
-            # Клонируем/обновляем репозиторий
-            cd /tmp
-            rm -rf sskd-infra
-            git clone --depth 1 https://github.com/${{ github.repository }}.git sskd-infra
-            cd sskd-infra/charts/sskd-infrastructure
+            cd /tmp/sskd-infra/charts/sskd-infrastructure
 
-            # Устанавливаем/обновляем инфраструктуру
             helm upgrade --install sskd-infrastructure . --create-namespace
 
-            echo "✅ Infrastructure deployed!"
-            echo ""
-            echo "📊 Headlamp: http://$(hostname -I | awk '{print $1}'):30080"
-            echo "🔑 Token: kubectl -n kube-system create token headlamp-admin"
+            echo "Done!"
 
             rm -rf /tmp/sskd-infra

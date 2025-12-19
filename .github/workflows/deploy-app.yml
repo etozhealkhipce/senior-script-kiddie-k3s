@@ -70,14 +70,12 @@ jobs:
             set -e
             echo "Deploying ${APP}..."
 
-            # GHCR secret
             kubectl create secret docker-registry ${APP}-ghcr-secret \
               --docker-server=${{ env.REGISTRY }} \
               --docker-username=${OWNER} \
               --docker-password=${{ secrets.GHCR_TOKEN }} \
               -n ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
 
-            # API URL secret (если передан)
             API_SECRET_SET=""
             if [ -n "${{ secrets.API_URL }}" ]; then
               kubectl create secret generic ${APP}-api-url \
@@ -86,7 +84,6 @@ jobs:
               API_SECRET_SET="--set app.secrets.apiUrl.enabled=true"
             fi
 
-            # Клонируем base charts и consumer values
             cd /tmp && rm -rf deploy-${APP}
             mkdir deploy-${APP} && cd deploy-${APP}
 
@@ -95,22 +92,18 @@ jobs:
 
             cd base/charts/sskd-app
 
-            # Helm dependency
             helm dependency update
 
-            # Values
             VALUES=""
             if [ -f "/tmp/deploy-${APP}/consumer/${{ inputs.values_file }}" ]; then
               VALUES="-f /tmp/deploy-${APP}/consumer/${{ inputs.values_file }}"
             fi
 
-            # Ingress
             INGRESS=""
             if [ -n "${HOST}" ]; then
               INGRESS="--set app.ingress.enabled=true --set app.ingress.host=${HOST}"
             fi
 
-            # Deploy!
             helm upgrade --install ${APP} . \
               --namespace ${{ env.NAMESPACE }} \
               ${VALUES} \
