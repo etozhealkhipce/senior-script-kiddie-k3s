@@ -1,0 +1,13 @@
+namespace: sskd
+
+ssl:
+  email: alhipce@mail.ru
+  # Базовый домен для wildcard
+  domain: sskd.tech
+  # Cloudflare credentials (для DNS challenge)
+  cloudflare:
+    email: "" # Заполнить или передать через --set
+    apiToken: "" # Заполнить или передать через --set
+
+headlamp:
+  nodePort: 30080

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: sskd
+  name: { { .Values.namespace } }
   labels:
-    name: sskd
+    name: { { .Values.namespace } }
     environment: production

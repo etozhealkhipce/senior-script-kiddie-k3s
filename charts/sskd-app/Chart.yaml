@@ -1,0 +1,9 @@
+apiVersion: v2
+name: sskd-app
+description: Universal chart for SSKD applications
+type: application
+version: 0.1.0
+dependencies:
+  - name: sskd-library
+    version: "0.1.0"
+    repository: "file://../sskd-library"

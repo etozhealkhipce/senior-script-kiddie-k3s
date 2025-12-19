@@ -1,0 +1,32 @@
+app:
+  name: my-app
+  namespace: sskd
+  replicas: 1
+  port: 80
+  healthPath: /
+
+  image:
+    repository: ghcr.io/owner/repo
+    tag: latest
+    pullPolicy: Always
+
+  env:
+    NODE_ENV: production
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+  ingress:
+    enabled: false
+    host: ""
+    path: /
+
+  secrets:
+    apiUrl:
+      enabled: false
+      envName: API_URL

@@ -1,0 +1,126 @@
+# ================= #
+# REUSABLE WORKFLOW #
+# ================= #
+name: Deploy App
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      app_host:
+        required: false
+        type: string
+        default: ""
+      values_file:
+        required: false
+        type: string
+        default: "deploy/values.yml"
+    secrets:
+      SSH_HOST:
+        required: true
+      SSH_USER:
+        required: true
+      SSH_PRIVATE_KEY:
+        required: true
+      GHCR_TOKEN:
+        required: true
+      API_URL:
+        required: false
+
+env:
+  REGISTRY: ghcr.io
+  NAMESPACE: sskd
+  BASE_REPO: alkhipce/senior-script-kiddie-k3s
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & Push Image
+        id: build
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.repository_owner }} --password-stdin
+
+          TAG="sha-${GITHUB_SHA::7}"
+          IMAGE="${{ env.REGISTRY }}/${{ github.repository }}:${TAG}"
+
+          docker build -t $IMAGE .
+          docker push $IMAGE
+
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Deploy to K3s
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          TAG: ${{ steps.build.outputs.tag }}
+          APP: ${{ inputs.app_name }}
+          HOST: ${{ inputs.app_host }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: TAG,APP,HOST,REPO,OWNER
+          script: |
+            set -e
+            echo "Deploying ${APP}..."
+
+            # GHCR secret
+            kubectl create secret docker-registry ${APP}-ghcr-secret \
+              --docker-server=${{ env.REGISTRY }} \
+              --docker-username=${OWNER} \
+              --docker-password=${{ secrets.GHCR_TOKEN }} \
+              -n ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+            # API URL secret (если передан)
+            API_SECRET_SET=""
+            if [ -n "${{ secrets.API_URL }}" ]; then
+              kubectl create secret generic ${APP}-api-url \
+                --from-literal=api-url="${{ secrets.API_URL }}" \
+                -n ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+              API_SECRET_SET="--set app.secrets.apiUrl.enabled=true"
+            fi
+
+            # Клонируем base charts и consumer values
+            cd /tmp && rm -rf deploy-${APP}
+            mkdir deploy-${APP} && cd deploy-${APP}
+
+            git clone --depth 1 https://github.com/${{ env.BASE_REPO }}.git base
+            git clone --depth 1 https://github.com/${REPO}.git consumer
+
+            cd base/charts/sskd-app
+
+            # Helm dependency
+            helm dependency update
+
+            # Values
+            VALUES=""
+            if [ -f "/tmp/deploy-${APP}/consumer/${{ inputs.values_file }}" ]; then
+              VALUES="-f /tmp/deploy-${APP}/consumer/${{ inputs.values_file }}"
+            fi
+
+            # Ingress
+            INGRESS=""
+            if [ -n "${HOST}" ]; then
+              INGRESS="--set app.ingress.enabled=true --set app.ingress.host=${HOST}"
+            fi
+
+            # Deploy!
+            helm upgrade --install ${APP} . \
+              --namespace ${{ env.NAMESPACE }} \
+              ${VALUES} \
+              --set app.name=${APP} \
+              --set app.image.repository=${{ env.REGISTRY }}/${REPO} \
+              --set app.image.tag=${TAG} \
+              ${INGRESS} \
+              ${API_SECRET_SET}
+
+            echo "Done!"
+            kubectl get pods -n ${{ env.NAMESPACE }} -l app=${APP}
+
+            rm -rf /tmp/deploy-${APP}

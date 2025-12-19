@@ -8,11 +8,9 @@ data:
     global:
       checkNewVersion: false
       sendAnonymousUsage: false
-
     api:
       dashboard: true
       insecure: false
-
     entryPoints:
       web:
         address: ":80"
@@ -24,12 +22,9 @@ data:
               permanent: true
       websecure:
         address: ":443"
-
     providers:
       kubernetesCRD: {}
       kubernetesIngress: {}
-
     log:
       level: INFO
-
     accessLog: {}

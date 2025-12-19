@@ -1,0 +1,39 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "charts/sskd-infrastructure/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Infrastructure to K3s
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            # Клонируем/обновляем репозиторий
+            cd /tmp
+            rm -rf sskd-infra
+            git clone --depth 1 https://github.com/${{ github.repository }}.git sskd-infra
+            cd sskd-infra/charts/sskd-infrastructure
+
+            # Устанавливаем/обновляем инфраструктуру
+            helm upgrade --install sskd-infrastructure . --create-namespace
+
+            echo "✅ Infrastructure deployed!"
+            echo ""
+            echo "📊 Headlamp: http://$(hostname -I | awk '{print $1}'):30080"
+            echo "🔑 Token: kubectl -n kube-system create token headlamp-admin"
+
+            rm -rf /tmp/sskd-infra

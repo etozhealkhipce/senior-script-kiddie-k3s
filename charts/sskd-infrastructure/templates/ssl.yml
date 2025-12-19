@@ -4,7 +4,7 @@ metadata:
   name: ssl
 spec:
   acme:
-    email: alhipce@mail.ru
+    email: { { .Values.ssl.email } }
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: ssl

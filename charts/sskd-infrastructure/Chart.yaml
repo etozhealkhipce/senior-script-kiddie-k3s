@@ -1,0 +1,6 @@
+apiVersion: v2
+name: sskd-infrastructure
+description: Infrastructure chart (namespace, SSL, Traefik, Headlamp)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
