@@ -68,6 +68,7 @@ jobs:
           envs: TAG,APP,HOST,REPO,OWNER
           script: |
             set -e
+            export KUBECONFIG=~/.kube/config
             echo "Deploying ${APP}..."
 
             kubectl create secret docker-registry ${APP}-ghcr-secret \
