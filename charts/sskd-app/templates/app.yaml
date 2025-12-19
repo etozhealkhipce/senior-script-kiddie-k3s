@@ -1,1 +1,1 @@
-{ { include "sskd-library.all" . } }
+{{ include "sskd-library.all" . }}
