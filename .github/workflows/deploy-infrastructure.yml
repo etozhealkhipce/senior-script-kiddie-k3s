@@ -37,8 +37,7 @@ jobs:
             helm dependency update
 
             helm upgrade --install sskd-infrastructure . \
-              --create-namespace \
-              --set pihole.adminPassword="${{ secrets.PIHOLE_ADMIN_PASSWORD }}"
+              --create-namespace
 
             echo "Done!"
 

@@ -64,6 +64,10 @@ kubectl -n default create token sskd-infrastructure-headlamp
 
 ---
 
+## DNS Server
+
+Открыть: `http://<SERVER_IP>:30081`
+
 ## 📁 Структура
 
 ```

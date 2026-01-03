@@ -21,14 +21,22 @@ technitium-dnsserver:
   enabled: true
   service:
     main:
-      type: NodePort
+      type: LoadBalancer
+      externalTrafficPolicy: Local
       ports:
         http:
-          nodePort: 30081
+          enabled: true
+          port: 5380
+          targetPort: 5380
+          protocol: TCP
         dns-udp:
-          nodePort: 30053
+          enabled: true
+          port: 53
+          protocol: UDP
         dns-tcp:
-          nodePort: 30053
+          enabled: true
+          port: 53
+          protocol: TCP
   persistence:
     config:
       enabled: true
