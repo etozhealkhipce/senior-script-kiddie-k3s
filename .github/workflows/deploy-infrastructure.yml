@@ -37,6 +37,7 @@ jobs:
             helm dependency update
 
             helm upgrade --install sskd-infrastructure . \
+              --namespace kube-system \
               --create-namespace \
               --set pihole.adminPassword="${{ secrets.PIHOLE_ADMIN_PASSWORD }}"
 
