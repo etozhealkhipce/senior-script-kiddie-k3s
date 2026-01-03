@@ -11,6 +11,6 @@ dependencies:
     repository: https://kubernetes-sigs.github.io/headlamp/
     condition: headlamp.enabled
   - name: technitium-dnsserver
-    version: "1.0.1"
+    version: "1.8.0"
     repository: https://charts.obeone.cloud
     condition: technitium-dnsserver.enabled
