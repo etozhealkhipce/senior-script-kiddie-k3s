@@ -18,11 +18,11 @@ headlamp:
       - host: headlamp.sskd.tech
         paths:
           - path: /
-    pathType: Prefix
+            type: Prefix
     tls:
-      - hosts:
+      - secretName: headlamp-tls
+        hosts:
           - headlamp.sskd.tech
-        secretName: headlamp-tls
   service:
     type: ClusterIP
     port: 80
