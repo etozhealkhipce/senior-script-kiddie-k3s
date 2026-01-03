@@ -11,6 +11,7 @@ headlamp:
   enabled: true
   service:
     type: NodePort
+    port: 80
     nodePort: 30080
   clusterRoleBinding:
     create: true
@@ -19,25 +20,22 @@ headlamp:
 pihole:
   enabled: true
   adminPassword: ""
-  DNS1: 1.1.1.1
-  DNS2: 1.0.0.1
+  DNS1: "1.1.1.1"
+  DNS2: "1.0.0.1"
   persistentVolumeClaim:
     enabled: true
     size: 1Gi
-  serviceDNS:
+  serviceDns:
+    mixedService: false
     type: NodePort
-    ports:
-      dns-udp:
-        nodePort: 30053
-        protocol: UDP
-      dns-tcp:
-        nodePort: 30053
-        protocol: TCP
+    port: 53
+    nodePort: "30053"
   serviceWeb:
     type: NodePort
-    ports:
-      http:
-        nodePort: 30081
+    http:
+      enabled: true
+      port: 80
+      nodePort: "30081"
   podDnsConfig:
     enabled: true
     policy: "None"
