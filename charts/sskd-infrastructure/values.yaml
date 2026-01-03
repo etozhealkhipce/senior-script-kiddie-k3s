@@ -9,16 +9,44 @@ ssl:
 
 headlamp:
   enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: ssl
+    hosts:
+      - host: headlamp.sskd.tech
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - hosts:
+          - headlamp.sskd.tech
+        secretName: headlamp-tls
   service:
-    type: NodePort
+    type: ClusterIP
     port: 80
-    nodePort: 30080
   clusterRoleBinding:
     create: true
     clusterRoleName: cluster-admin
 
 technitium-dnsserver:
   enabled: true
+  ingress:
+    main:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: ssl
+      hosts:
+        - host: dns.sskd.tech
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - dns.sskd.tech
+          secretName: technitium-dns-tls
   service:
     main:
       type: LoadBalancer
