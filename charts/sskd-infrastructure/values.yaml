@@ -2,12 +2,46 @@ namespace: sskd
 
 ssl:
   email: alhipce@mail.ru
-  # Базовый домен для wildcard
   domain: sskd.tech
-  # Cloudflare credentials (для DNS challenge)
   cloudflare:
-    email: "" # Заполнить или передать через --set
-    apiToken: "" # Заполнить или передать через --set
+    email: ""
+    apiToken: ""
 
 headlamp:
-  nodePort: 30080
+  enabled: true
+  service:
+    type: NodePort
+    nodePort: 30080
+  clusterRoleBinding:
+    create: true
+    clusterRoleName: cluster-admin
+
+pihole:
+  enabled: true
+  adminPassword: ""
+  DNS1: 1.1.1.1
+  DNS2: 1.0.0.1
+  persistentVolumeClaim:
+    enabled: true
+    size: 1Gi
+  serviceDNS:
+    type: NodePort
+    ports:
+      dns-udp:
+        nodePort: 30053
+        protocol: UDP
+      dns-tcp:
+        nodePort: 30053
+        protocol: TCP
+  serviceWeb:
+    type: NodePort
+    ports:
+      http:
+        nodePort: 30081
+  podDnsConfig:
+    enabled: true
+    policy: "None"
+    nameservers:
+      - 127.0.0.1
+      - 1.1.1.1
+

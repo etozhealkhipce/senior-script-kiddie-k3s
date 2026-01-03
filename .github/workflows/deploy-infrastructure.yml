@@ -34,7 +34,11 @@ jobs:
 
             cd /tmp/sskd-infra/charts/sskd-infrastructure
 
-            helm upgrade --install sskd-infrastructure . --create-namespace
+            helm dependency update
+
+            helm upgrade --install sskd-infrastructure . \
+              --create-namespace \
+              --set pihole.adminPassword="${{ secrets.PIHOLE_ADMIN_PASSWORD }}"
 
             echo "Done!"
 
