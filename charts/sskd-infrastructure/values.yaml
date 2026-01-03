@@ -17,11 +17,15 @@ headlamp:
     create: true
     clusterRoleName: cluster-admin
 
-powerdns:
+technitium-dnsserver:
   enabled: true
-  apiKey: ""
-  adminSecretKey: ""
-  dnsNodePort: 30053
-  webNodePort: 30081
+  service:
+    dns:
+      type: NodePort
+      nodePort: 30053
+    web:
+      type: NodePort
+      nodePort: 30081
   persistence:
+    enabled: true
     size: 1Gi
