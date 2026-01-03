@@ -20,12 +20,18 @@ headlamp:
 technitium-dnsserver:
   enabled: true
   service:
-    dns:
+    main:
       type: NodePort
-      nodePort: 30053
-    web:
-      type: NodePort
-      nodePort: 30081
+      ports:
+        http:
+          nodePort: 30081
+        dns-udp:
+          nodePort: 30053
+        dns-tcp:
+          nodePort: 30053
   persistence:
-    enabled: true
-    size: 1Gi
+    config:
+      enabled: true
+      type: pvc
+      size: 1Gi
+      mountPath: /etc/dns
