@@ -1,0 +1,157 @@
+{{- if .Values.powerdns.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: powerdns-secret
+  namespace: {{ .Values.namespace }}
+type: Opaque
+stringData:
+  PDNS_API_KEY: "{{ .Values.powerdns.apiKey }}"
+  PDNSADMIN_SECRET_KEY: "{{ .Values.powerdns.adminSecretKey }}"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: powerdns-data
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.powerdns.persistence.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerdns
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: powerdns
+  template:
+    metadata:
+      labels:
+        app: powerdns
+    spec:
+      containers:
+        - name: powerdns
+          image: powerdns/pdns-auth-48:latest
+          ports:
+            - containerPort: 53
+              protocol: UDP
+            - containerPort: 53
+              protocol: TCP
+            - containerPort: 8081
+              protocol: TCP
+          env:
+            - name: PDNS_AUTH_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: powerdns-secret
+                  key: PDNS_API_KEY
+          args:
+            - --api=yes
+            - --api-key=$(PDNS_AUTH_API_KEY)
+            - --webserver=yes
+            - --webserver-address=0.0.0.0
+            - --webserver-port=8081
+            - --webserver-allow-from=0.0.0.0/0
+            - --launch=gsqlite3
+            - --gsqlite3-database=/var/lib/powerdns/pdns.sqlite3
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/powerdns
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: powerdns-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerdns-dns
+  namespace: {{ .Values.namespace }}
+spec:
+  type: NodePort
+  selector:
+    app: powerdns
+  ports:
+    - name: dns-udp
+      port: 53
+      targetPort: 53
+      protocol: UDP
+      nodePort: {{ .Values.powerdns.dnsNodePort }}
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP
+      nodePort: {{ .Values.powerdns.dnsNodePort }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerdns-api
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app: powerdns
+  ports:
+    - name: api
+      port: 8081
+      targetPort: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerdns-admin
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: powerdns-admin
+  template:
+    metadata:
+      labels:
+        app: powerdns-admin
+    spec:
+      containers:
+        - name: powerdns-admin
+          image: powerdnsadmin/pda-legacy:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: powerdns-secret
+                  key: PDNSADMIN_SECRET_KEY
+            - name: PDNS_API_URL
+              value: "http://powerdns-api:8081"
+            - name: PDNS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: powerdns-secret
+                  key: PDNS_API_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerdns-admin
+  namespace: {{ .Values.namespace }}
+spec:
+  type: NodePort
+  selector:
+    app: powerdns-admin
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: {{ .Values.powerdns.webNodePort }}
+{{- end }}
+

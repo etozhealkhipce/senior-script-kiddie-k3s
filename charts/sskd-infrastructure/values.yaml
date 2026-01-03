@@ -17,31 +17,11 @@ headlamp:
     create: true
     clusterRoleName: cluster-admin
 
-pihole:
+powerdns:
   enabled: true
-  adminPassword: ""
-  DNS1: "1.1.1.1"
-  DNS2: "1.0.0.1"
-  
-  persistentVolumeClaim:
-    enabled: true
+  apiKey: ""
+  adminSecretKey: ""
+  dnsNodePort: 30053
+  webNodePort: 30081
+  persistence:
     size: 1Gi
-  
-  serviceDns:
-    mixedService: true
-    type: NodePort
-    port: 53
-  
-  serviceWeb:
-    type: NodePort
-    http:
-      enabled: true
-      port: 80
-      nodePort: 30081
-  
-  podDnsConfig:
-    enabled: true
-    policy: "None"
-    nameservers:
-      - 127.0.0.1
-      - 1.1.1.1
