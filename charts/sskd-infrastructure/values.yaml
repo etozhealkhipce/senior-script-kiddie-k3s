@@ -29,6 +29,14 @@ technitium-dnsserver:
           port: 5380
           targetPort: 5380
           protocol: TCP
+        https:
+          enabled: false
+        dhcp:
+          enabled: false
+        dot:
+          enabled: false
+        doh-reverse:
+          enabled: false
         dns-udp:
           enabled: true
           port: 53
