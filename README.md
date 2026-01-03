@@ -57,7 +57,7 @@ kubectl wait --for=condition=Ready pods -l app.kubernetes.io/instance=cert-manag
 ## 📊 Headlamp (Dashboard)
 
 ```bash
-kubectl -n kube-system create token headlamp-admin
+kubectl -n default create token sskd-infrastructure-headlamp
 ```
 
 Открыть: `http://<SERVER_IP>:30080`
