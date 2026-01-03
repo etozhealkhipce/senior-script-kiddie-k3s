@@ -18,7 +18,7 @@ headlamp:
       - host: headlamp.sskd.tech
         paths:
           - path: /
-            pathType: Prefix
+    pathType: Prefix
     tls:
       - hosts:
           - headlamp.sskd.tech
