@@ -20,8 +20,15 @@ spec:
       labels:
         app: {{ .Values.app.name }}
     spec:
+      {{- if hasKey .Values.app "imagePullSecrets" }}
+        {{- if .Values.app.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.app.imagePullSecrets | nindent 8 }}
+        {{- end }}
+      {{- else }}
       imagePullSecrets:
         - name: {{ .Values.app.name }}-ghcr-secret
+      {{- end }}
       {{- if .Values.app.initContainers }}
       initContainers:
         {{- range .Values.app.initContainers }}
