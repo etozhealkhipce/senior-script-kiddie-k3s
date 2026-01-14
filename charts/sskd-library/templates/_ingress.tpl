@@ -25,7 +25,7 @@ spec:
               service:
                 name: {{ .Values.app.name }}
                 port:
-                  number: 80
+                  number: {{ .Values.app.port | default 80 }}
   tls:
     - secretName: {{ .Values.app.name }}-tls
       hosts:
