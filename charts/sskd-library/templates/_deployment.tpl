@@ -84,6 +84,12 @@ spec:
             limits:
               memory: {{ .Values.app.resources.limits.memory | default "256Mi" | quote }}
               cpu: {{ .Values.app.resources.limits.cpu | default "200m" | quote }}
+          {{- if hasKey .Values.app "livenessProbe" }}
+            {{- if .Values.app.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.app.livenessProbe | nindent 12 }}
+            {{- end }}
+          {{- else }}
           livenessProbe:
             httpGet:
               path: {{ .Values.app.healthPath | default "/" }}
@@ -92,6 +98,13 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
+          {{- end }}
+          {{- if hasKey .Values.app "readinessProbe" }}
+            {{- if .Values.app.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.app.readinessProbe | nindent 12 }}
+            {{- end }}
+          {{- else }}
           readinessProbe:
             httpGet:
               path: {{ .Values.app.healthPath | default "/" }}
@@ -100,6 +113,7 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
+          {{- end }}
           {{- if .Values.app.persistence.enabled }}
           volumeMounts:
             - name: {{ .Values.app.name }}-data
