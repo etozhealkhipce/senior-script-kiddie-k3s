@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copy charts to server
+      - name: COPY CHARTS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -23,7 +23,7 @@ jobs:
           source: "charts/sskd-infrastructure/*"
           target: "/tmp/sskd-infra"
 
-      - name: Deploy Infrastructure to K3s
+      - name: DEPLOY
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -39,6 +39,6 @@ jobs:
             helm upgrade --install sskd-infrastructure . \
               --create-namespace
 
-            echo "Done!"
+            echo "DEPLOYED"
 
             rm -rf /tmp/sskd-infra

@@ -22,12 +22,40 @@ spec:
     spec:
       imagePullSecrets:
         - name: {{ .Values.app.name }}-ghcr-secret
+      {{- if .Values.app.initContainers }}
+      initContainers:
+        {{- range .Values.app.initContainers }}
+        - name: {{ .name }}
+          image: {{ .image | default (printf "%s:%s" $.Values.app.image.repository ($.Values.app.image.tag | default "latest")) }}
+          {{- if .command }}
+          command: {{ .command | toJson }}
+          {{- end }}
+          {{- if .args }}
+          args: {{ .args | toJson }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ $.Values.app.name }}-secrets
+                optional: true
+          {{- if .env }}
+          env:
+            {{- range $key, $value := .env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Values.app.name }}
           image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.app.image.pullPolicy | default "Always" }}
           ports:
             - containerPort: {{ .Values.app.port | default 80 }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.app.name }}-secrets
+                optional: true
           {{- if .Values.app.env }}
           env:
             {{- range $key, $value := .Values.app.env }}
@@ -65,5 +93,16 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
+          {{- if .Values.app.persistence.enabled }}
+          volumeMounts:
+            - name: {{ .Values.app.name }}-data
+              mountPath: {{ .Values.app.persistence.mountPath | default "/var/lib/postgresql/data" }}
+          {{- end }}
+      {{- if .Values.app.persistence.enabled }}
+      volumes:
+        - name: {{ .Values.app.name }}-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.app.name }}-pvc
+      {{- end }}
 {{- end }}
 
