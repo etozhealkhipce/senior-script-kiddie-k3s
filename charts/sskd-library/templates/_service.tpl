@@ -14,7 +14,7 @@ spec:
   selector:
     app: {{ .Values.app.name }}
   ports:
-    - port: 80
+    - port: {{ .Values.app.port | default 80 }}
       targetPort: {{ .Values.app.port | default 80 }}
 {{- end }}
 
