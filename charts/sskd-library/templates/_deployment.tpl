@@ -114,12 +114,12 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
           {{- end }}
-          {{- if .Values.app.persistence.enabled }}
+          {{- if and .Values.app.persistence .Values.app.persistence.enabled }}
           volumeMounts:
             - name: {{ .Values.app.name }}-data
               mountPath: {{ .Values.app.persistence.mountPath | default "/var/lib/postgresql/data" }}
           {{- end }}
-      {{- if .Values.app.persistence.enabled }}
+      {{- if and .Values.app.persistence .Values.app.persistence.enabled }}
       volumes:
         - name: {{ .Values.app.name }}-data
           persistentVolumeClaim:
