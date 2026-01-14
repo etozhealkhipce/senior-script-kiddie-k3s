@@ -3,14 +3,14 @@ All-in-one template - renders PVC, deployment, service, ingress, and proxy
 Usage: {{ include "sskd-library.all" . }}
 */}}
 {{- define "sskd-library.all" -}}
-{{- if .Values.app.persistence.enabled }}
+{{- if and .Values.app.persistence .Values.app.persistence.enabled }}
 {{ include "sskd-library.pvc" . }}
 ---
 {{- end }}
 {{ include "sskd-library.deployment" . }}
 ---
 {{ include "sskd-library.service" . }}
-{{- if .Values.app.ingress.enabled }}
+{{- if and .Values.app.ingress .Values.app.ingress.enabled }}
 ---
 {{ include "sskd-library.ingress" . }}
 {{- end }}
