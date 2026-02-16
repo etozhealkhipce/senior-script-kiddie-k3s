@@ -19,6 +19,15 @@ spec:
     - host: {{ .Values.app.ingress.host }}
       http:
         paths:
+          {{- range .Values.app.ingress.extraPaths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ .serviceName }}
+                port:
+                  number: {{ .servicePort }}
+          {{- end }}
           - path: {{ .Values.app.ingress.path | default "/" }}
             pathType: Prefix
             backend:
@@ -32,4 +41,3 @@ spec:
         - {{ .Values.app.ingress.host }}
 {{- end }}
 {{- end }}
-
