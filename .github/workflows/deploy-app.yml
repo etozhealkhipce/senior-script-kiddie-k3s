@@ -127,8 +127,8 @@ jobs:
             cd /tmp && rm -rf deploy-${APP}
             mkdir deploy-${APP} && cd deploy-${APP}
 
-            git clone --depth 1 https://github.com/${{ env.BASE_REPO }}.git base
-            git clone --depth 1 https://github.com/${REPO}.git consumer
+            git clone --depth 1 https://${{ secrets.GHCR_TOKEN }}@github.com/${{ env.BASE_REPO }}.git base
+            git clone --depth 1 https://${{ secrets.GHCR_TOKEN }}@github.com/${REPO}.git consumer
 
             cd base/charts/sskd-app
 
