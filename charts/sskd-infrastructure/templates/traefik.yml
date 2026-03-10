@@ -1,30 +1,11 @@
-apiVersion: v1
-kind: ConfigMap
+# https://docs.k3s.io/add-ons/helm#customizing-packaged-components-with-helmchartconfig
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
 metadata:
-  name: traefik-config
+  name: traefik
   namespace: kube-system
-data:
-  traefik.yml: |
-    global:
-      checkNewVersion: false
-      sendAnonymousUsage: false
-    api:
-      dashboard: true
-      insecure: false
-    entryPoints:
-      web:
-        address: ":80"
-        http:
-          redirections:
-            entryPoint:
-              to: websecure
-              scheme: https
-              permanent: true
-      websecure:
-        address: ":443"
-    providers:
-      kubernetesCRD: {}
-      kubernetesIngress: {}
-    log:
-      level: INFO
-    accessLog: {}
+spec:
+  valuesContent: |-
+    additionalArguments:
+      - --entrypoints.web.http.redirections.entrypoint.to=:443
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
