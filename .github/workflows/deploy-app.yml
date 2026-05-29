@@ -21,10 +21,6 @@ on:
         required: false
         type: string
         default: ""
-      server:
-        required: false
-        type: string
-        default: "1"
     secrets:
       GHCR_TOKEN:
         required: true
@@ -37,7 +33,6 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: server-${{ inputs.server }}
     steps:
       - uses: actions/checkout@v4
 

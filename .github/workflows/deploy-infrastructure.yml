@@ -7,20 +7,10 @@ on:
       - "charts/sskd-infrastructure/**"
       - ".github/workflows/deploy-infrastructure.yml"
   workflow_dispatch:
-    inputs:
-      server:
-        description: "Target server"
-        required: true
-        default: "1"
-        type: choice
-        options:
-          - "1"
-          - "2"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: server-${{ inputs.server || '1' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -46,11 +36,7 @@ jobs:
 
             helm dependency update
 
-            if [ "${{ inputs.server }}" = "2" ]; then
-              helm upgrade --install sskd-infrastructure . --create-namespace -f values-server2.yaml
-            else
-              helm upgrade --install sskd-infrastructure . --create-namespace
-            fi
+            helm upgrade --install sskd-infrastructure . --create-namespace
 
             echo "DEPLOYED"
 
