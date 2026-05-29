@@ -51,9 +51,7 @@ jobs:
               VALUES_OVERRIDE="-f /tmp/sskd-infra/charts/sskd-infrastructure/values-server2.yaml"
             fi
 
-            helm upgrade --install sskd-infrastructure . \
-              --create-namespace \
-              $VALUES_OVERRIDE
+            helm upgrade --install sskd-infrastructure . --create-namespace $VALUES_OVERRIDE
 
             echo "DEPLOYED"
 
