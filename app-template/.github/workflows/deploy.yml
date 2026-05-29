@@ -6,6 +6,16 @@ name: Deploy
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      server:
+        description: "Target server"
+        required: false
+        default: "1"
+        type: choice
+        options:
+          - "1"
+          - "2"
 
 jobs:
   deploy:
@@ -13,4 +23,5 @@ jobs:
     with:
       app_name: my-app           # <-- ИЗМЕНИТЕ
       app_host: my-app.sskd.tech # <-- ИЗМЕНИТЕ (удалите если не нужен ingress)
+      server: ${{ inputs.server || '1' }}
     secrets: inherit

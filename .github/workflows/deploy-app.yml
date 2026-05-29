@@ -21,14 +21,11 @@ on:
         required: false
         type: string
         default: ""
+      server:
+        required: false
+        type: string
+        default: "1"
     secrets:
-      # INFRA (for all repos)
-      SSH_HOST:
-        required: true
-      SSH_USER:
-        required: true
-      SSH_PRIVATE_KEY:
-        required: true
       GHCR_TOKEN:
         required: true
 
@@ -40,6 +37,7 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: server-${{ inputs.server }}
     steps:
       - uses: actions/checkout@v4
 
@@ -71,9 +69,9 @@ jobs:
 
           for secret_name in "${SECRET_NAMES[@]}"; do
             secret_name=$(echo "$secret_name" | xargs)
-            
+
             value=$(jq -r --arg k "$secret_name" '.[$k]' /tmp/secrets.json)
-            
+
             if [ -n "$value" ] && [ "$value" != "null" ]; then
               encoded=$(echo -n "$value" | base64 -w 0)
               SECRET_DATA="${SECRET_DATA}  ${secret_name}: ${encoded}\n"
