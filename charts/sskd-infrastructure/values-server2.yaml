@@ -1,2 +1,14 @@
 technitium-dnsserver:
   enabled: false
+
+headlamp:
+  ingress:
+    hosts:
+      - host: headlamp-contabo.sskd.tech
+        paths:
+          - path: /
+            type: Prefix
+    tls:
+      - secretName: headlamp-contabo-tls
+        hosts:
+          - headlamp-contabo.sskd.tech
