@@ -46,10 +46,12 @@ jobs:
 
             helm dependency update
 
+            kubectl create namespace sskd --dry-run=client -o yaml | kubectl apply -f -
+
             if [ "${{ inputs.server }}" = "2" ]; then
-              helm upgrade --install sskd-infrastructure . --create-namespace --namespace sskd -f values-server2.yaml
+              helm upgrade --install sskd-infrastructure . --namespace sskd -f values-server2.yaml
             else
-              helm upgrade --install sskd-infrastructure . --create-namespace --namespace sskd
+              helm upgrade --install sskd-infrastructure . --namespace sskd
             fi
 
             echo "DEPLOYED"
