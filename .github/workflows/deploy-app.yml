@@ -22,9 +22,6 @@ on:
         type: string
         default: ""
       udp_ports:
-        # Список UDP-портов через запятую (напр. "16261,16262").
-        # Если задан — создаётся LoadBalancer Service ${app}-udp (k3s ServiceLB
-        # биндит порты на IP ноды). Пусто = ничего не создаётся (дефолт).
         required: false
         type: string
         default: ""
