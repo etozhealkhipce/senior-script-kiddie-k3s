@@ -21,6 +21,13 @@ on:
         required: false
         type: string
         default: ""
+      udp_ports:
+        # Список UDP-портов через запятую (напр. "16261,16262").
+        # Если задан — создаётся LoadBalancer Service ${app}-udp (k3s ServiceLB
+        # биндит порты на IP ноды). Пусто = ничего не создаётся (дефолт).
+        required: false
+        type: string
+        default: ""
     secrets:
       # INFRA (for all repos)
       SSH_HOST:
@@ -86,6 +93,13 @@ jobs:
           echo "data=$(echo -e "$SECRET_DATA" | base64 -w 0)" >> $GITHUB_OUTPUT
           echo "PREPARED"
 
+      - name: VALUES
+        id: values
+        run: |
+          if [ -f "${{ inputs.values_file }}" ]; then
+            echo "data=$(base64 -w 0 "${{ inputs.values_file }}")" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: DEPLOY
         uses: appleboy/ssh-action@v1.0.3
         env:
@@ -95,11 +109,13 @@ jobs:
           REPO: ${{ github.repository }}
           OWNER: ${{ github.repository_owner }}
           SECRET_DATA: ${{ steps.secrets.outputs.data }}
+          VALUES_B64: ${{ steps.values.outputs.data }}
+          UDP_PORTS: ${{ inputs.udp_ports }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: TAG,APP,HOST,REPO,OWNER,SECRET_DATA
+          envs: TAG,APP,HOST,REPO,OWNER,SECRET_DATA,VALUES_B64,UDP_PORTS
           script: |
             set -e
             export KUBECONFIG=~/.kube/config
@@ -128,15 +144,15 @@ jobs:
             mkdir deploy-${APP} && cd deploy-${APP}
 
             git clone --depth 1 https://github.com/${{ env.BASE_REPO }}.git base
-            git clone --depth 1 https://github.com/${REPO}.git consumer
 
             cd base/charts/sskd-app
 
             helm dependency update
 
             VALUES=""
-            if [ -f "/tmp/deploy-${APP}/consumer/${{ inputs.values_file }}" ]; then
-              VALUES="-f /tmp/deploy-${APP}/consumer/${{ inputs.values_file }}"
+            if [ -n "$VALUES_B64" ]; then
+              echo "$VALUES_B64" | base64 -d > /tmp/deploy-${APP}/values.yml
+              VALUES="-f /tmp/deploy-${APP}/values.yml"
             fi
 
             INGRESS=""
@@ -154,5 +170,31 @@ jobs:
 
             echo "DEPLOYED"
             kubectl get pods -n ${{ env.NAMESPACE }} -l app=${APP}
+
+            if [ -n "$UDP_PORTS" ]; then
+              {
+                echo "apiVersion: v1"
+                echo "kind: Service"
+                echo "metadata:"
+                echo "  name: ${APP}-udp"
+                echo "  namespace: ${{ env.NAMESPACE }}"
+                echo "  labels:"
+                echo "    app: ${APP}"
+                echo "spec:"
+                echo "  type: LoadBalancer"
+                echo "  externalTrafficPolicy: Local"
+                echo "  selector:"
+                echo "    app: ${APP}"
+                echo "  ports:"
+                for port in $(echo "$UDP_PORTS" | tr ',' ' '); do
+                  echo "    - name: udp-${port}"
+                  echo "      port: ${port}"
+                  echo "      targetPort: ${port}"
+                  echo "      protocol: UDP"
+                done
+              } | kubectl apply -f -
+              echo "UDP SERVICE APPLIED (${UDP_PORTS})"
+              kubectl get svc ${APP}-udp -n ${{ env.NAMESPACE }} -o wide
+            fi
 
             rm -rf /tmp/deploy-${APP}
