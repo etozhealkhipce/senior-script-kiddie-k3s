@@ -5,6 +5,10 @@ app:
   port: 80
   healthPath: /
 
+  hostNetwork: false
+
+  nodeSelector: {}
+
   image:
     repository: ""
     tag: ""

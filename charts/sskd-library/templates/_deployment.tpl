@@ -20,6 +20,14 @@ spec:
       labels:
         app: {{ .Values.app.name }}
     spec:
+      {{- if .Values.app.hostNetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
+      {{- if .Values.app.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.app.nodeSelector | nindent 8 }}
+      {{- end }}
       {{- if hasKey .Values.app "imagePullSecrets" }}
         {{- if .Values.app.imagePullSecrets }}
       imagePullSecrets:
