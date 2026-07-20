@@ -9,6 +9,8 @@ ssl:
 
 headlamp:
   enabled: true
+  nodeSelector:
+    kubernetes.io/hostname: '30363'
   ingress:
     enabled: true
     ingressClassName: traefik
@@ -32,6 +34,8 @@ headlamp:
 
 technitium-dnsserver:
   enabled: true
+  nodeSelector:
+    kubernetes.io/hostname: '30363'
   ingress:
     main:
       enabled: true

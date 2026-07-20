@@ -36,8 +36,7 @@ jobs:
 
             helm dependency update
 
-            helm upgrade --install sskd-infrastructure . \
-              --create-namespace
+            helm upgrade --install sskd-infrastructure . --create-namespace
 
             echo "DEPLOYED"
 
