@@ -47,9 +47,16 @@ jobs:
 
           TAG="sha-${GITHUB_SHA::7}"
           IMAGE="${{ env.REGISTRY }}/${{ github.repository }}:${TAG}"
+          CACHE="${{ env.REGISTRY }}/${{ github.repository }}:buildcache"
 
-          docker build -t $IMAGE .
-          docker push $IMAGE
+          docker buildx create --use --name sskd-builder --driver docker-container 2>/dev/null \
+            || docker buildx use sskd-builder
+
+          docker buildx build \
+            --cache-from "type=registry,ref=$CACHE" \
+            --cache-to   "type=registry,ref=$CACHE,mode=max" \
+            -t "$IMAGE" \
+            --push .
 
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
