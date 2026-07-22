@@ -12,6 +12,13 @@ metadata:
     app: {{ .Values.app.name }}
 spec:
   replicas: {{ .Values.app.replicas | default 1 }}
+  {{- if .Values.app.updateStrategy }}
+  strategy:
+    {{- toYaml .Values.app.updateStrategy | nindent 4 }}
+  {{- else if .Values.app.hostNetwork }}
+  strategy:
+    type: Recreate
+  {{- end }}
   selector:
     matchLabels:
       app: {{ .Values.app.name }}
