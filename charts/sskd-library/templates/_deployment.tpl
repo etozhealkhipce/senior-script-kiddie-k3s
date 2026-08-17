@@ -109,10 +109,10 @@ spec:
             httpGet:
               path: {{ .Values.app.healthPath | default "/" }}
               port: {{ .Values.app.port | default 80 }}
-            initialDelaySeconds: 10
+            initialDelaySeconds: 30
             periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 3
+            timeoutSeconds: 15
+            failureThreshold: 5
           {{- end }}
           {{- if hasKey .Values.app "readinessProbe" }}
             {{- if .Values.app.readinessProbe }}
@@ -124,10 +124,10 @@ spec:
             httpGet:
               path: {{ .Values.app.healthPath | default "/" }}
               port: {{ .Values.app.port | default 80 }}
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 5
           {{- end }}
           {{- if and .Values.app.persistence .Values.app.persistence.enabled }}
           volumeMounts:
