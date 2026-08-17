@@ -11,6 +11,10 @@ headlamp:
   enabled: true
   nodeSelector:
     kubernetes.io/hostname: '30363'
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
   ingress:
     enabled: true
     ingressClassName: traefik
@@ -36,6 +40,10 @@ technitium-dnsserver:
   enabled: true
   nodeSelector:
     kubernetes.io/hostname: '30363'
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
   ingress:
     main:
       enabled: true
