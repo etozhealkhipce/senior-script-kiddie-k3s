@@ -9,8 +9,6 @@ ssl:
 
 headlamp:
   enabled: true
-  nodeSelector:
-    kubernetes.io/hostname: '30363'
   tolerations:
     - key: node-role.kubernetes.io/control-plane
       operator: Exists
