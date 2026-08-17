@@ -1,0 +1,15 @@
+# https://docs.k3s.io/add-ons/helm#customizing-packaged-components-with-helmchartconfig
+# Default probe timeouts (1s) are too tight for this node — a brief CPU/IO
+# stall from any pod causes kubelet to kill CoreDNS as a false positive,
+# breaking DNS cluster-wide (seen as sporadic EAI_AGAIN in app logs).
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: coredns
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    livenessProbe:
+      timeoutSeconds: 60
+    readinessProbe:
+      timeoutSeconds: 60
