@@ -54,6 +54,50 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 kubectl wait --for=condition=Ready pods -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=120s
 ```
 
+## ⚠️ Обязательно после установки — иначе через пару месяцев начнутся рестарты
+
+На маленьких серверах (1-2GB RAM) control-plane нода легко забивается пользовательскими
+приложениями и уходит в своп-трэшинг — coredns/traefik/metrics-server начинают ловить
+ложные срабатывания проб и рестартоваться пачками. Разбор одного такого случая: coredns —
+1000+ рестартов, нода на грани OOM. Три вещи ниже — не опциональны.
+
+### 1. Тейнт control-plane ноды
+
+Не пускать на неё ничего, кроме `kube-system`, `cert-manager`, `default` — остальные
+namespace'ы (приложения) должны уезжать на другие ноды. Работает "из коробки" для будущих
+деплоев и новых нод — ничего доплняно настраивать не надо, taint просто не пускает поды без
+toleration.
+
+```bash
+kubectl taint nodes $(hostname) node-role.kubernetes.io/control-plane:NoSchedule
+```
+
+coredns/traefik/metrics-server уже умеют это toleration'ить сами (встроено в их манифесты).
+headlamp и technitium-dnsserver — сторонние чарты, toleration для них уже прописан в
+`charts/sskd-infrastructure/values.yaml`, ничего руками делать не нужно.
+
+### 2. Таймауты проб для coredns и metrics-server
+
+Дефолтный `timeoutSeconds: 1` слишком мал для нагруженной ноды — под первым же CPU/IO-стоппом
+kubelet убивает coredns/metrics-server как ложное срабатывание.
+
+При установке через `curl -sfL https://get.k3s.io | sh -` (как в шаге выше) coredns и
+metrics-server ставятся как `Addon` (`k3s.cattle.io/v1`), обычные статические манифесты —
+`HelmChartConfig` для них не работает, значения таймаутов правим прямо в манифестах на диске
+ноды:
+```bash
+sudo grep -n "timeoutSeconds" /var/lib/rancher/k3s/server/manifests/coredns.yaml
+sudo sed -i 's/timeoutSeconds: 1$/timeoutSeconds: 60/' /var/lib/rancher/k3s/server/manifests/coredns.yaml
+
+# найти файл metrics-server (имя может отличаться от версии к версии)
+sudo grep -rl "metrics-server" /var/lib/rancher/k3s/server/manifests/
+sudo sed -i 's/timeoutSeconds: 1$/timeoutSeconds: 60/' /var/lib/rancher/k3s/server/manifests/<файл-metrics-server>.yaml
+```
+k3s сам подхватит изменение файла и пересоздаст поды — рестарт сервиса не нужен.
+
+⚠️ Это правка на диске конкретной ноды, вне git. После апгрейда k3s-бинаря стоит перепроверить
+(`sudo grep -n timeoutSeconds ...`) — вдруг файл перезаписался дефолтом.
+
 ## 📊 Headlamp (Dashboard)
 
 ```bash
