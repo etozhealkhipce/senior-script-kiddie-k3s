@@ -89,9 +89,10 @@ metrics-server ставятся как `Addon` (`k3s.cattle.io/v1`), обычн�
 sudo grep -n "timeoutSeconds" /var/lib/rancher/k3s/server/manifests/coredns.yaml
 sudo sed -i 's/timeoutSeconds: 1$/timeoutSeconds: 60/' /var/lib/rancher/k3s/server/manifests/coredns.yaml
 
-# найти файл metrics-server (имя может отличаться от версии к версии)
-sudo grep -rl "metrics-server" /var/lib/rancher/k3s/server/manifests/
-sudo sed -i 's/timeoutSeconds: 1$/timeoutSeconds: 60/' /var/lib/rancher/k3s/server/manifests/<файл-metrics-server>.yaml
+# metrics-server — не файл, а папка с несколькими манифестами; нужный — *-deployment.yaml
+# (имя может отличаться от версии к версии, проверьте sudo ls .../manifests/metrics-server/)
+sudo grep -rn "timeoutSeconds" /var/lib/rancher/k3s/server/manifests/metrics-server/
+sudo sed -i 's/timeoutSeconds: 1$/timeoutSeconds: 60/' /var/lib/rancher/k3s/server/manifests/metrics-server/metrics-server-deployment.yaml
 ```
 k3s сам подхватит изменение файла и пересоздаст поды — рестарт сервиса не нужен.
 
