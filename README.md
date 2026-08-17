@@ -52,6 +52,14 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 # Cert-manager
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml
 kubectl wait --for=condition=Ready pods -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=120s
+
+# Разрешить cert-manager попадать на control-plane ноду (см. секцию про taint ниже) —
+# cert-manager ставится разовым kubectl apply, а не Addon/HelmChart, поэтому патч не
+# откатится сам собой и его нужно применить один раз руками
+for d in cert-manager cert-manager-webhook cert-manager-cainjector; do
+  kubectl patch deployment $d -n cert-manager --type merge -p \
+    '{"spec":{"template":{"spec":{"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Exists","effect":"NoSchedule"}]}}}}'
+done
 ```
 
 ## ⚠️ Обязательно после установки — иначе через пару месяцев начнутся рестарты
