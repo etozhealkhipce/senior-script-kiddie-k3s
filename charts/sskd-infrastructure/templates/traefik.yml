@@ -9,3 +9,12 @@ spec:
     additionalArguments:
       - --entrypoints.web.http.redirections.entrypoint.to=:443
       - --entrypoints.web.http.redirections.entrypoint.permanent=true
+    # Local сохраняет настоящий IP клиента: с Cluster ServiceLB подменял его внутренним адресом,
+    # и лимит запросов по IP у приложений (rushthesky) считал всех посетителей одним.
+    # Local отвечает только на ноде, где работает сам Traefik, поэтому он закреплён на 30363 —
+    # ноде, на которую смотрят DNS-записи (77.240.38.216); так же устроен technitium.
+    service:
+      spec:
+        externalTrafficPolicy: Local
+    nodeSelector:
+      kubernetes.io/hostname: "30363"
